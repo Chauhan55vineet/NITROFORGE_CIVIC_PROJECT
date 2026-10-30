@@ -1,0 +1,31 @@
+# render.yaml — Render Blueprint for CivicPulse AI
+# One-click deploy configuration: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: civicpulse-ai
+    runtime: python
+    region: singapore   # closest region for India-based demos (change to oregon / frankfurt as needed)
+    plan: free          # Use 'starter' for production (no sleep)
+
+    # Build & Start
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT
+
+    # Persistent Disk — keeps SQLite database & uploaded images across deploys
+    disk:
+      name: civicpulse-data
+      mountPath: /opt/render/project/src/backend/data
+      sizeGB: 1
+
+    # Environment Variables (set via Render Dashboard or here)
+    envVars:
+      - key: HF_TOKEN
+        sync: false      # Fill in the Render dashboard — never commit the real token
+      - key: PYTHON_VERSION
+        value: "3.12"
+      - key: PORT
+        value: "10000"
+
+    # Health check endpoint
+    healthCheckPath: /api/health
